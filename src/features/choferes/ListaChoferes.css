@@ -1,0 +1,28 @@
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+.filtro {
+  padding: 8px 14px; border: 1px solid var(--borde); border-radius: 999px;
+  background: #fff; color: var(--texto); cursor: pointer;
+}
+.filtro[aria-pressed='true'] { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 600; }
+
+.titulo-seccion { margin: 0 0 4px; font-size: 22px; color: var(--verde); }
+.nota { margin: 0 0 20px; color: var(--suave); }
+
+.tabla-caja { overflow-x: auto; background: #fff; border: 1px solid var(--borde); border-radius: 12px; }
+.tabla { width: 100%; border-collapse: collapse; min-width: 640px; }
+.tabla th, .tabla td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--borde); }
+.tabla th { font-size: 13px; color: var(--suave); font-weight: 600; }
+.tabla tr:last-child td { border-bottom: 0; }
+.chofer-nombre { font-weight: 600; }
+.chofer-correo { font-size: 13px; color: var(--suave); }
+
+.conteos { display: flex; gap: 6px; flex-wrap: wrap; }
+.etiqueta { padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.etiqueta.pendiente { background: #FBF0D0; color: #7A5B00; }
+.etiqueta.aprobado { background: var(--verde-suave); color: var(--verde); }
+.etiqueta.rechazado { background: #FDE2E2; color: #B42318; }
+.etiqueta.neutro { background: #F0EEE4; color: var(--suave); }
+.vacio { padding: 32px 16px; text-align: center; color: var(--suave); }
+
+.fila-click { cursor: pointer; }
+.fila-click:hover { background: #F4F8F3; }
