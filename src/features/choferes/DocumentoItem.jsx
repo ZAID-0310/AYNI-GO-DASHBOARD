@@ -68,13 +68,15 @@ export default function DocumentoItem({ doc, onRevisado }) {
   };
 
   return (
-    <div className="caja-detalle">
+    <div className="documento-card">
       <div className="documento-fila">
-        <div>
+        <div className="documento-info-meta">
           <div className="chofer-nombre">{NOMBRES_DOC[doc.tipo] ?? doc.tipo}</div>
           <div className="chofer-correo">Subido: {fecha(doc.subido_en)}</div>
           {doc.estado === 'rechazado' && doc.motivo_rechazo ? (
-            <div className="chofer-correo">Motivo: {doc.motivo_rechazo}</div>
+            <div className="motivo-rechazo-badge">
+              <span>⚠️ Motivo:</span> {doc.motivo_rechazo}
+            </div>
           ) : null}
         </div>
         <span className={`etiqueta ${est.clase}`}>{est.texto}</span>
@@ -82,21 +84,32 @@ export default function DocumentoItem({ doc, onRevisado }) {
 
       <div className="acciones-doc">
         {url ? (
-          <button className="boton-texto" onClick={() => setUrl(null)}>Ocultar</button>
+          <button className="boton-texto" onClick={() => setUrl(null)}>
+            <span>▲</span> Ocultar documento
+          </button>
         ) : (
           <button className="boton-texto" onClick={verDocumento} disabled={cargandoUrl}>
-            {cargandoUrl ? 'Abriendo...' : 'Ver documento'}
+            <span>{cargandoUrl ? '⏳' : '👁️'}</span> {cargandoUrl ? 'Abriendo...' : 'Ver documento'}
           </button>
         )}
+        
         {!rechazando ? (
-          <>
-            <button className="boton-aprobar" onClick={() => revisar('aprobado')} disabled={guardando || doc.estado === 'aprobado'}>
+          <div className="grupo-botones-revision">
+            <button 
+              className="boton-aprobar" 
+              onClick={() => revisar('aprobado')} 
+              disabled={guardando || doc.estado === 'aprobado'}
+            >
               Aprobar
             </button>
-            <button className="boton-rechazar" onClick={() => setRechazando(true)} disabled={guardando}>
+            <button 
+              className="boton-rechazar" 
+              onClick={() => setRechazando(true)} 
+              disabled={guardando}
+            >
               Rechazar
             </button>
-          </>
+          </div>
         ) : null}
       </div>
 
@@ -105,7 +118,7 @@ export default function DocumentoItem({ doc, onRevisado }) {
           <textarea
             className="campo-motivo"
             rows={2}
-            placeholder="Motivo del rechazo (lo verá el chofer)"
+            placeholder="Escribe el motivo del rechazo (lo verá el chofer)..."
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
           />
@@ -120,7 +133,11 @@ export default function DocumentoItem({ doc, onRevisado }) {
         </div>
       ) : null}
 
-      {error ? <p className="error" role="alert">{error}</p> : null}
+      {error ? (
+        <div className="error-banner" role="alert">
+          <span>⚠️</span> {error}
+        </div>
+      ) : null}
 
       {url ? (
         <div className="visor">

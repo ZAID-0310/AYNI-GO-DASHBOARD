@@ -4,7 +4,6 @@ import './DetalleChofer.css';
 import DocumentoItem from './DocumentoItem';
 import HistorialChofer from './HistorialChofer';
 
-
 export default function DetalleChofer({ choferId, onVolver }) {
   const [detalle, setDetalle] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -33,50 +32,99 @@ export default function DetalleChofer({ choferId, onVolver }) {
   const documentos = detalle?.documentos ?? [];
 
   return (
-    <section>
-      <button className="boton-texto" onClick={onVolver}>← Volver a la lista</button>
+    <div className="detalle-chofer-container">
+      {/* Barra superior de navegación */}
+      <div className="detalle-actions-bar">
+        <button className="boton-texto" onClick={onVolver}>
+          <span className="icono-flecha">←</span> Volver a la lista
+        </button>
+      </div>
 
-      {cargando ? <p className="vacio">Cargando...</p> : null}
-      {error ? <p className="error" role="alert">{error}</p> : null}
+      {cargando && (
+        <div className="estado-contenedor">
+          <div className="spinner"></div>
+          <p className="vacio">Cargando información del conductor...</p>
+        </div>
+      )}
 
-      {usuario ? (
-        <>
-          <h2 className="titulo-seccion">{usuario.nombre}</h2>
-          <p className="nota">
-            {usuario.email}
-            {usuario.telefono ? ` · ${usuario.telefono}` : ''}
-          </p>
-          <span className={`etiqueta ${usuario.chofer_verificado ? 'aprobado' : 'neutro'}`}>
-            {usuario.chofer_verificado ? 'Verificado' : 'No verificado'}
-          </span>
+      {error && (
+        <div className="error-banner" role="alert">
+          <span>⚠️</span> {error}
+        </div>
+      )}
 
-          <h3 className="subtitulo-detalle">Vehículo</h3>
-          {vehiculos.length === 0 ? (
-            <p className="nota">No registró vehículo.</p>
-          ) : (
-            vehiculos.map((v) => (
-              <div key={v.placa} className="caja-detalle">
-                <strong>{v.placa}</strong> · {v.modelo} · {v.capacidad_pasajeros} pasajeros
+      {!cargando && usuario && (
+        <div className="detalle-content">
+          {/* Tarjeta de Cabecera / Perfil del Conductor */}
+          <div className="card-perfil">
+            <div className="perfil-info-principal">
+              <div className="avatar-placeholder">
+                {usuario.nombre ? usuario.nombre.charAt(0).toUpperCase() : 'C'}
               </div>
-            ))
-          )}
+              <div className="perfil-datos">
+                <div className="titulo-con-badge">
+                  <h2 className="titulo-seccion">{usuario.nombre}</h2>
+                  <span className={`etiqueta ${usuario.chofer_verificado ? 'aprobado' : 'neutro'}`}>
+                    {usuario.chofer_verificado ? '✓ Verificado' : 'Pendiente de verificación'}
+                  </span>
+                </div>
+                <p className="nota contacto-info">
+                  <span>✉️ {usuario.email}</span>
+                  {usuario.telefono ? ` · 📞 ${usuario.telefono}` : ''}
+                </p>
+              </div>
+            </div>
+          </div>
 
-          <h3 className="subtitulo-detalle">Documentos</h3>
-          {documentos.length === 0 ? (
-            <p className="nota">Todavía no subió documentos.</p>
-          ) : (
-              documentos.map((d) => (
-              <DocumentoItem
-                key={d.id}
-                doc={d}
-                onRevisado={() => { cargar(true); setVersion((v) => v + 1); }}
-              />
-                        ))
-          )}
+          {/* Grid Principal del Dashboard */}
+          <div className="dashboard-grid">
+            {/* Columna Izquierda: Vehículos y Documentos */}
+            <div className="columna-principal">
+              <section className="seccion-bloque">
+                <h3 className="subtitulo-detalle">🚗 Vehículo registrado</h3>
+                {vehiculos.length === 0 ? (
+                  <p className="nota vacio-nota">El conductor no registró ningún vehículo.</p>
+                ) : (
+                  vehiculos.map((v) => (
+                    <div key={v.placa} className="caja-detalle vehiculo-card">
+                      <div className="vehiculo-badge-placa">{v.placa}</div>
+                      <div className="vehiculo-info">
+                        <p><strong>Modelo:</strong> {v.modelo}</p>
+                        <p><strong>Capacidad:</strong> {v.capacidad_pasajeros} pasajeros</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </section>
 
-          <HistorialChofer choferId={choferId} version={version} />
-        </>
-      ) : null}
-    </section>
+              <section className="seccion-bloque">
+                <h3 className="subtitulo-detalle">📂 Documentación</h3>
+                {documentos.length === 0 ? (
+                  <p className="nota vacio-nota">Todavía no ha subido documentos.</p>
+                ) : (
+                  <div className="documentos-lista">
+                    {documentos.map((d) => (
+                      <DocumentoItem
+                        key={d.id}
+                        doc={d}
+                        onRevisado={() => { cargar(true); setVersion((v) => v + 1); }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>
+
+            {/* Columna Derecha: Historial de Actividad */}
+            <div className="columna-lateral">
+              <section className="seccion-bloque sticky-sidebar">
+                <h3 className="subtitulo-detalle">📊 Historial de Actividad</h3>
+                <HistorialChofer choferId={choferId} version={version} />
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

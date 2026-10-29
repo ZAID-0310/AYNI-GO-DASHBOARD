@@ -18,7 +18,9 @@ const FILTROS = [
 const CLASE = { subido: 'pendiente', aprobado: 'aprobado', rechazado: 'rechazado' };
 
 const fecha = (iso) =>
-  new Date(iso).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
+  iso
+    ? new Date(iso).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' })
+    : '—';
 
 export default function HistorialGlobal({ onAbrirChofer }) {
   const [filas, setFilas] = useState([]);
@@ -42,71 +44,109 @@ export default function HistorialGlobal({ onAbrirChofer }) {
   const visibles = filtro === 'todos' ? filas : filas.filter((f) => f.accion === filtro);
 
   return (
-    <section>
-      <h2 className="titulo-seccion">Historial de revisiones</h2>
-      <p className="nota">Quién aprobó o rechazó cada documento. Se muestran los últimos 200 movimientos.</p>
+    <section className="historial-global-container">
+      <div className="historial-header">
+        <h2 className="titulo-seccion">Historial de Revisiones</h2>
+        <p className="nota">Registro de quién aprobó, rechazó o subió cada documento. Se muestran los últimos 200 movimientos.</p>
+      </div>
 
-      <div className="filtros">
+      {/* Botones de filtro modernos en formato píldora */}
+      <div className="filtros" role="tablist">
         {FILTROS.map((f) => (
-          <button key={f.id} className="filtro" aria-pressed={filtro === f.id} onClick={() => setFiltro(f.id)}>
+          <button
+            key={f.id}
+            role="tab"
+            className="filtro"
+            aria-pressed={filtro === f.id}
+            onClick={() => setFiltro(f.id)}
+          >
             {f.label}
           </button>
         ))}
       </div>
 
-      {error ? <p className="error" role="alert">{error}</p> : null}
+      {error ? (
+        <div className="error-banner" role="alert">
+          <span>⚠️</span> {error}
+        </div>
+      ) : null}
 
       <div className="tabla-caja">
         {cargando ? (
-          <p className="vacio">Cargando...</p>
+          <div className="estado-contenedor">
+            <div className="spinner"></div>
+            <p className="vacio">Cargando historial...</p>
+          </div>
         ) : visibles.length === 0 && !error ? (
-          <p className="vacio">No hay movimientos para este filtro.</p>
+          <div className="estado-vacio">
+            <span className="icono-vacio">📋</span>
+            <p className="vacio">No hay movimientos para este filtro.</p>
+          </div>
         ) : (
-          <table className="tabla">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Acción</th>
-                <th>Documento</th>
-                <th>Chofer</th>
-                <th>Hecho por</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibles.map((h) => (
-                <tr
-                  key={h.id}
-                  className="fila-click"
-                  tabIndex={0}
-                  onClick={() => onAbrirChofer(h.chofer_id)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') onAbrirChofer(h.chofer_id); }}
-                >
-                  <td>{fecha(h.creado_en)}</td>
-                  <td>
-                    <span className={`etiqueta ${CLASE[h.accion] ?? 'neutro'}`}>{h.accion}</span>
-                    {h.accion === 'rechazado' && h.motivo ? (
-                      <div className="chofer-correo">Motivo: {h.motivo}</div>
-                    ) : null}
-                  </td>
-                  <td>{NOMBRES_DOC[h.tipo] ?? h.tipo}</td>
-                  <td>
-                    <div className="chofer-nombre">{h.chofer_nombre}</div>
-                    <div className="chofer-correo">{h.chofer_email}</div>
-                  </td>
-                  <td>
-                    {h.actor_es_admin ? (
-                      <>
-                        <div className="chofer-nombre">{h.actor_nombre ?? 'Administrador'}</div>
-                        <div className="chofer-correo">{h.actor_email}</div>
-                      </>
-                    ) : (
-                      <span className="chofer-correo">El chofer</span>
-                    )}
-                  </td>
+          <div className="tabla-wrapper">
+            <table className="tabla">
+              <thead>
+                <tr>
+                  <th>Fecha y Hora</th>
+                  <th>Acción / Estado</th>
+                  <th>Documento</th>
+                  <th>Conductor</th>
+                  <th>Realizado por</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {visibles.map((h) => (
+                  <tr
+                    key={h.id}
+                    className="fila-click"
+                    tabIndex={0}
+                    onClick={() => onAbrirChofer(h.chofer_id)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') onAbrirChofer(h.chofer_id); }}
+                  >
+                    <td>
+                      <span className="fecha-texto">{fecha(h.creado_en)}</span>
+                    </td>
+                    <td>
+                      <div className="accion-celda">
+                        <span className={`etiqueta ${CLASE[h.accion] ?? 'neutro'}`}>
+                          {h.accion.charAt(0).toUpperCase() + h.accion.slice(1)}
+                        </span>
+                        {h.accion === 'rechazado' && h.motivo ? (
+                          <div className="motivo-historial">
+                            <span>Motivo:</span> {h.motivo}
+                          </div>
+                        ) : null}
+                      </div>
+                    </td>
+                    <td>
+                      <span className="doc-tipo-texto">{NOMBRES_DOC[h.tipo] ?? h.tipo}</span>
+                    </td>
+                    <td>
+                      <div className="chofer-perfil-celda">
+                        <div className="chofer-avatar-min">
+                          {h.chofer_nombre ? h.chofer_nombre.charAt(0).toUpperCase() : 'C'}
+                        </div>
+                        <div>
+                          <div className="chofer-nombre">{h.chofer_nombre}</div>
+                          <div className="chofer-correo">{h.chofer_email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      {h.actor_es_admin ? (
+                        <div className="actor-admin">
+                          <div className="chofer-nombre">{h.actor_nombre ?? 'Administrador'}</div>
+                          <div className="chofer-correo">{h.actor_email}</div>
+                        </div>
+                      ) : (
+                        <span className="chofer-correo actor-chofer">El conductor mismo</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </section>

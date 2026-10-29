@@ -37,66 +37,96 @@ export default function ListaChoferes({ onAbrir }) {
   const actual = FILTROS.find((f) => f.id === filtro);
 
   return (
-    <section>
-      <h2 className="titulo-seccion">Choferes</h2>
-      <p className="nota">Revisa la documentación de cada chofer antes de habilitarlo.</p>
+    <section className="lista-choferes-container">
+      <div className="lista-header">
+        <h2 className="titulo-seccion">Gestión de Choferes</h2>
+        <p className="nota">Revisa la documentación y estado de cada conductor antes de habilitarlo en la plataforma.</p>
+      </div>
 
-      <div className="filtros">
+      {/* Botones de filtro modernos en formato píldora */}
+      <div className="filtros" role="tablist">
         {FILTROS.map((f) => (
-          <button key={f.id} className="filtro" aria-pressed={filtro === f.id} onClick={() => setFiltro(f.id)}>
+          <button
+            key={f.id}
+            role="tab"
+            className="filtro"
+            aria-pressed={filtro === f.id}
+            onClick={() => setFiltro(f.id)}
+          >
             {f.label}
           </button>
         ))}
       </div>
 
-      {error ? <p className="error" role="alert">{error}</p> : null}
+      {error ? (
+        <div className="error-banner" role="alert">
+          <span>⚠️</span> {error}
+        </div>
+      ) : null}
 
       <div className="tabla-caja">
         {cargando ? (
-          <p className="vacio">Cargando...</p>
+          <div className="estado-contenedor">
+            <div className="spinner"></div>
+            <p className="vacio">Cargando lista de choferes...</p>
+          </div>
         ) : choferes.length === 0 && !error ? (
-          <p className="vacio">{actual.vacio}</p>
+          <div className="estado-vacio">
+            <span className="icono-vacio">📂</span>
+            <p className="vacio">{actual.vacio}</p>
+          </div>
         ) : (
-          <table className="tabla">
-            <thead>
-              <tr>
-                <th>Chofer</th>
-                <th>Documentos</th>
-                <th>Estado</th>
-                <th>Último documento subido</th>
-              </tr>
-            </thead>
-            <tbody>
-              {choferes.map((c) => (
-                <tr
-                  key={c.id}
-                  className="fila-click"
-                  tabIndex={0}
-                  onClick={() => onAbrir(c.id)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') onAbrir(c.id); }}
-                >
-                  <td>
-                    <div className="chofer-nombre">{c.nombre}</div>
-                    <div className="chofer-correo">{c.email}</div>
-                  </td>
-                  <td>
-                    <div className="conteos">
-                      {c.pendientes > 0 && <span className="etiqueta pendiente">{c.pendientes} por revisar</span>}
-                      {c.aprobados > 0 && <span className="etiqueta aprobado">{c.aprobados} aprobados</span>}
-                      {c.rechazados > 0 && <span className="etiqueta rechazado">{c.rechazados} rechazados</span>}
-                      {c.subidos === 0 && <span className="etiqueta neutro">Sin documentos</span>}
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`etiqueta ${c.chofer_verificado ? 'aprobado' : 'neutro'}`}>
-                      {c.chofer_verificado ? 'Verificado' : 'No verificado'}
-                    </span>
-                  </td>
-                  <td>{fecha(c.ultima_subida)}</td>
+          <div className="tabla-wrapper">
+            <table className="tabla">
+              <thead>
+                <tr>
+                  <th>Conductor</th>
+                  <th>Documentos</th>
+                  <th>Estado del Sistema</th>
+                  <th>Última Actividad</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {choferes.map((c) => (
+                  <tr
+                    key={c.id}
+                    className="fila-click"
+                    tabIndex={0}
+                    onClick={() => onAbrir(c.id)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') onAbrir(c.id); }}
+                  >
+                    <td>
+                      <div className="chofer-perfil-celda">
+                        <div className="chofer-avatar-min">
+                          {c.nombre ? c.nombre.charAt(0).toUpperCase() : 'C'}
+                        </div>
+                        <div>
+                          <div className="chofer-nombre">{c.nombre}</div>
+                          <div className="chofer-correo">{c.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="conteos">
+                        {c.pendientes > 0 && <span className="etiqueta pendiente">{c.pendientes} por revisar</span>}
+                        {c.aprobados > 0 && <span className="etiqueta aprobado">{c.aprobados} aprobados</span>}
+                        {c.rechazados > 0 && <span className="etiqueta rechazado">{c.rechazados} rechazados</span>}
+                        {c.subidos === 0 && <span className="etiqueta neutro">Sin documentos</span>}
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`etiqueta ${c.chofer_verificado ? 'aprobado' : 'neutro'}`}>
+                        {c.chofer_verificado ? '✓ Verificado' : 'No verificado'}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="fecha-texto">{fecha(c.ultima_subida)}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </section>
