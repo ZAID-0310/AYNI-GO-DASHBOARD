@@ -1,0 +1,61 @@
+:root {
+  --verde: #0F5132;
+  --verde-suave: #DCEBDD;
+  --crema: #FAF7EE;
+  --borde: #E3E0D5;
+  --texto: #1A1A1A;
+  --suave: #666666;
+  --error: #DC2626;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--crema);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; }
+button, input { font: inherit; }
+:focus-visible { outline: 3px solid var(--verde); outline-offset: 2px; }
+
+/* Login */
+.login { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.login-tarjeta {
+  width: 100%; max-width: 380px; background: #fff;
+  border: 1px solid var(--borde); border-radius: 16px; padding: 28px;
+}
+.marca { margin: 0; font-size: 28px; font-weight: 800; color: var(--verde); }
+.subtitulo { margin: 4px 0 24px; color: var(--suave); }
+.campo { display: block; margin-bottom: 16px; }
+.campo span { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.campo input {
+  width: 100%; padding: 11px 12px; border: 1px solid var(--borde);
+  border-radius: 10px; background: #fff; color: var(--texto);
+}
+.error { color: var(--error); font-size: 14px; margin: 0 0 14px; }
+.boton {
+  width: 100%; padding: 12px; border: 0; border-radius: 10px;
+  background: var(--verde); color: #fff; font-weight: 700; cursor: pointer;
+}
+.boton:disabled { opacity: 0.6; cursor: default; }
+
+/* Panel (provisional) */
+.barra {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 24px; background: #fff; border-bottom: 1px solid var(--borde);
+}
+.barra .marca { font-size: 20px; }
+.barra-usuario { display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--suave); }
+.boton-texto {
+  background: none; border: 1px solid var(--borde); border-radius: 10px;
+  padding: 8px 12px; color: var(--verde); font-weight: 600; cursor: pointer;
+}
+.contenido { max-width: 960px; margin: 0 auto; padding: 24px; }
+.cargando { min-height: 100vh; display: grid; place-items: center; color: var(--suave); }
+
+.menu-panel { display: flex; gap: 6px; margin-left: 24px; flex: 1; }
+.menu-item {
+  background: none; border: none; font: inherit; font-weight: 700;
+  color: #666; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+}
+.menu-item:hover { background: #F4F8F3; }
+.menu-item[aria-current="true"] { background: #DCEBDD; color: #0F5132; }

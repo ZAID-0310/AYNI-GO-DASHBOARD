@@ -1,0 +1,233 @@
+/* Contenedor general */
+.lista-choferes-container {
+  padding: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: inherit;
+  color: #1f2937;
+}
+
+.lista-header {
+  margin-bottom: 20px;
+}
+
+.titulo-seccion {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.nota {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Filtros modernos */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.filtro {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #374151;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.filtro:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.filtro[aria-pressed='true'] {
+  background: #0F5132;
+  border-color: #0F5132;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(15, 81, 50, 0.2);
+}
+
+/* Contenedor de la tabla */
+.tabla-caja {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.tabla-wrapper {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+  text-align: left;
+}
+
+.tabla th {
+  background: #f9fafb;
+  padding: 14px 20px;
+  font-size: 13px;
+  color: #4b5563;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+  letter-spacing: 0.3px;
+}
+
+.tabla td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.tabla tr:last-child td {
+  border-bottom: none;
+}
+
+/* Fila interactiva */
+.fila-click {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.fila-click:hover {
+  background-color: #f8fafc;
+}
+
+.fila-click:focus-visible {
+  outline: 2px solid #0F5132;
+  outline-offset: -2px;
+}
+
+/* Celda de perfil con mini avatar */
+.chofer-perfil-celda {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chofer-avatar-min {
+  width: 38px;
+  height: 38px;
+  background: #0F5132;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chofer-nombre {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+}
+
+.chofer-correo {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.fecha-texto {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+/* Conteos y Etiquetas de Estado */
+.conteos {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.etiqueta {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.etiqueta.pendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.etiqueta.aprobado {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.etiqueta.rechazado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.etiqueta.neutro {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+/* Estados vacíos y carga */
+.estado-contenedor, .estado-vacio {
+  text-align: center;
+  padding: 48px 20px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #0F5132;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.vacio {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.icono-vacio {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.error-banner {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #fecaca;
+}
