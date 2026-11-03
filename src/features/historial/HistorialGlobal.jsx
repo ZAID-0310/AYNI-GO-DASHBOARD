@@ -1,148 +1,196 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase';
+import useHistorialGlobal from './useHistorialGlobal';
+import {
+  FILTROS,
+  NOMBRES_DOC,
+  ESTILOS_ACCION,
+  formatearFecha,
+  capitalizar,
+  inicial,
+} from './historialConstantes';
 
-const NOMBRES_DOC = {
-  dni: 'DNI',
-  licencia_conducir: 'Licencia de conducir',
-  soat: 'SOAT',
-  tarjeta_propiedad: 'Tarjeta de propiedad',
-};
+/* ---------- Piezas de presentación ---------- */
 
-const FILTROS = [
-  { id: 'todos', label: 'Todos' },
-  { id: 'aprobado', label: 'Aprobados' },
-  { id: 'rechazado', label: 'Rechazados' },
-  { id: 'subido', label: 'Subidos por el chofer' },
-];
+function FiltroPildora({ activo, label, conteo, onClick }) {
+  return (
+    <button
+      role="tab"
+      aria-selected={activo}
+      onClick={onClick}
+      className={`inline-flex items-center gap-2 rounded-2xl border px-5 py-3 text-sm font-semibold transition
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2
+        ${
+          activo
+            ? 'border-emerald-900 bg-emerald-900 text-white shadow-md shadow-emerald-900/20'
+            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+        }`}
+    >
+      {label}
+      <span
+        className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+          activo ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+        }`}
+      >
+        {conteo ?? 0}
+      </span>
+    </button>
+  );
+}
 
-const CLASE = { subido: 'pendiente', aprobado: 'aprobado', rechazado: 'rechazado' };
+function Etiqueta({ accion }) {
+  const estilo = ESTILOS_ACCION[accion] ?? ESTILOS_ACCION.neutro;
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${estilo}`}
+    >
+      {capitalizar(accion)}
+    </span>
+  );
+}
 
-const fecha = (iso) =>
-  iso
-    ? new Date(iso).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' })
-    : '—';
+function Avatar({ nombre }) {
+  return (
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-900 text-sm font-bold text-white">
+      {inicial(nombre)}
+    </div>
+  );
+}
+
+function EstadoCarga() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-20">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-900" />
+      <p className="text-sm text-slate-500">Cargando historial...</p>
+    </div>
+  );
+}
+
+function EstadoVacio() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 py-20">
+      <span className="text-4xl">📋</span>
+      <p className="text-sm text-slate-500">No hay movimientos para este filtro.</p>
+    </div>
+  );
+}
+
+function FilaHistorial({ h, onAbrir }) {
+  return (
+    <tr
+      tabIndex={0}
+      onClick={() => onAbrir(h.chofer_id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onAbrir(h.chofer_id);
+      }}
+      className="cursor-pointer transition hover:bg-slate-50 focus:bg-slate-50 focus:outline-none"
+    >
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+        {formatearFecha(h.creado_en)}
+      </td>
+
+      <td className="px-6 py-4">
+        <div className="flex flex-col items-start gap-2">
+          <Etiqueta accion={h.accion} />
+          {h.accion === 'rechazado' && h.motivo && (
+            <p className="max-w-xs rounded-lg bg-red-50 px-3 py-1.5 text-xs text-red-800">
+              <span className="font-semibold">Motivo:</span> {h.motivo}
+            </p>
+          )}
+        </div>
+      </td>
+
+      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900">
+        {NOMBRES_DOC[h.tipo] ?? h.tipo}
+      </td>
+
+      <td className="px-6 py-4">
+        <div className="flex items-center gap-3">
+          <Avatar nombre={h.chofer_nombre} />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-slate-900">{h.chofer_nombre}</p>
+            <p className="truncate text-xs text-slate-500">{h.chofer_email}</p>
+          </div>
+        </div>
+      </td>
+
+      <td className="px-6 py-4">
+        {h.actor_es_admin ? (
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-slate-900">
+              {h.actor_nombre ?? 'Administrador'}
+            </p>
+            <p className="truncate text-xs text-slate-500">{h.actor_email}</p>
+          </div>
+        ) : (
+          <span className="text-xs italic text-slate-500">El conductor mismo</span>
+        )}
+      </td>
+    </tr>
+  );
+}
+
+/* ---------- Componente principal ---------- */
 
 export default function HistorialGlobal({ onAbrirChofer }) {
-  const [filas, setFilas] = useState([]);
-  const [filtro, setFiltro] = useState('todos');
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    let vigente = true;
-    supabase
-      .rpc('admin_historial_documentos', { p_chofer_id: null, p_limite: 200 })
-      .then(({ data, error: e }) => {
-        if (!vigente) return;
-        if (e) setError('No se pudo cargar el historial. Recarga la página e inténtalo de nuevo.');
-        else setFilas(data ?? []);
-        setCargando(false);
-      });
-    return () => { vigente = false; };
-  }, []);
-
-  const visibles = filtro === 'todos' ? filas : filas.filter((f) => f.accion === filtro);
+  const { visibles, conteos, filtro, setFiltro, cargando, error, limite } =
+    useHistorialGlobal();
 
   return (
-    <section className="historial-global-container">
-      <div className="historial-header">
-        <h2 className="titulo-seccion">Historial de Revisiones</h2>
-        <p className="nota">Registro de quién aprobó, rechazó o subió cada documento. Se muestran los últimos 200 movimientos.</p>
-      </div>
+    <section className="mx-auto w-full max-w-7xl px-6 py-10">
+      {/* Encabezado */}
+      <header className="mb-6">
+        <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          Historial de Revisiones
+        </h2>
+        <p className="mt-2 text-base text-slate-500">
+          Registro de quién aprobó, rechazó o subió cada documento. Se muestran los últimos{' '}
+          {limite} movimientos.
+        </p>
+      </header>
 
-      {/* Botones de filtro modernos en formato píldora */}
-      <div className="filtros" role="tablist">
+      {/* Filtros */}
+      <div role="tablist" className="mb-6 flex flex-wrap gap-3">
         {FILTROS.map((f) => (
-          <button
+          <FiltroPildora
             key={f.id}
-            role="tab"
-            className="filtro"
-            aria-pressed={filtro === f.id}
+            label={f.label}
+            conteo={conteos[f.id]}
+            activo={filtro === f.id}
             onClick={() => setFiltro(f.id)}
-          >
-            {f.label}
-          </button>
+          />
         ))}
       </div>
 
-      {error ? (
-        <div className="error-banner" role="alert">
-          <span>⚠️</span> {error}
+      {/* Error */}
+      {error && (
+        <div
+          role="alert"
+          className="mb-6 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
+        >
+          <span aria-hidden>⚠️</span> {error}
         </div>
-      ) : null}
+      )}
 
-      <div className="tabla-caja">
+      {/* Tabla */}
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         {cargando ? (
-          <div className="estado-contenedor">
-            <div className="spinner"></div>
-            <p className="vacio">Cargando historial...</p>
-          </div>
+          <EstadoCarga />
         ) : visibles.length === 0 && !error ? (
-          <div className="estado-vacio">
-            <span className="icono-vacio">📋</span>
-            <p className="vacio">No hay movimientos para este filtro.</p>
-          </div>
+          <EstadoVacio />
         ) : (
-          <div className="tabla-wrapper">
-            <table className="tabla">
-              <thead>
-                <tr>
-                  <th>Fecha y Hora</th>
-                  <th>Acción / Estado</th>
-                  <th>Documento</th>
-                  <th>Conductor</th>
-                  <th>Realizado por</th>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[56rem] text-left">
+              <thead className="border-b border-slate-200 bg-slate-50/60">
+                <tr className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-4">Fecha y hora</th>
+                  <th className="px-6 py-4">Acción / Estado</th>
+                  <th className="px-6 py-4">Documento</th>
+                  <th className="px-6 py-4">Conductor</th>
+                  <th className="px-6 py-4">Realizado por</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {visibles.map((h) => (
-                  <tr
-                    key={h.id}
-                    className="fila-click"
-                    tabIndex={0}
-                    onClick={() => onAbrirChofer(h.chofer_id)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') onAbrirChofer(h.chofer_id); }}
-                  >
-                    <td>
-                      <span className="fecha-texto">{fecha(h.creado_en)}</span>
-                    </td>
-                    <td>
-                      <div className="accion-celda">
-                        <span className={`etiqueta ${CLASE[h.accion] ?? 'neutro'}`}>
-                          {h.accion.charAt(0).toUpperCase() + h.accion.slice(1)}
-                        </span>
-                        {h.accion === 'rechazado' && h.motivo ? (
-                          <div className="motivo-historial">
-                            <span>Motivo:</span> {h.motivo}
-                          </div>
-                        ) : null}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="doc-tipo-texto">{NOMBRES_DOC[h.tipo] ?? h.tipo}</span>
-                    </td>
-                    <td>
-                      <div className="chofer-perfil-celda">
-                        <div className="chofer-avatar-min">
-                          {h.chofer_nombre ? h.chofer_nombre.charAt(0).toUpperCase() : 'C'}
-                        </div>
-                        <div>
-                          <div className="chofer-nombre">{h.chofer_nombre}</div>
-                          <div className="chofer-correo">{h.chofer_email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      {h.actor_es_admin ? (
-                        <div className="actor-admin">
-                          <div className="chofer-nombre">{h.actor_nombre ?? 'Administrador'}</div>
-                          <div className="chofer-correo">{h.actor_email}</div>
-                        </div>
-                      ) : (
-                        <span className="chofer-correo actor-chofer">El conductor mismo</span>
-                      )}
-                    </td>
-                  </tr>
+                  <FilaHistorial key={h.id} h={h} onAbrir={onAbrirChofer} />
                 ))}
               </tbody>
             </table>
