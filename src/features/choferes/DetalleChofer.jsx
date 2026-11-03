@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import './DetalleChofer.css';
 import DocumentoItem from './DocumentoItem';
 import HistorialChofer from './HistorialChofer';
 

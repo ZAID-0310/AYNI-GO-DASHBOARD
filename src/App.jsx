@@ -4,7 +4,7 @@ import Login from './features/auth/Login';
 import ListaChoferes from './features/choferes/ListaChoferes';
 import DetalleChofer from './features/choferes/DetalleChofer';
 import HistorialGlobal from './features/historial/HistorialGlobal';
-import './App.css';
+import Header from './components/Header';
 
 export default function App() {
   const [vista, setVista] = useState('cargando');
@@ -33,6 +33,11 @@ export default function App() {
     comprobar();
   }, []);
 
+  const irASeccion = (nombre) => {
+    setSeccion(nombre);
+    setChoferId(null);
+  };
+
   const cerrarSesion = async () => {
     await supabase.auth.signOut();
     setChoferId(null);
@@ -42,8 +47,8 @@ export default function App() {
 
   if (vista === 'cargando') {
     return (
-      <div className="pantalla-cargando">
-        <div className="spinner-lg"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50 text-slate-500 font-semibold">
+        <div className="w-10 h-10 border-[3px] border-slate-200 border-t-[#0E4E48] rounded-full animate-spin" />
         <p>Iniciando Ayni Go Admin...</p>
       </div>
     );
@@ -52,44 +57,15 @@ export default function App() {
   if (vista === 'login') return <Login onEntrar={comprobar} />;
 
   return (
-    <div className="app-layout">
-      {/* Navbar Superior de Administración */}
-      <header className="barra-superior">
-        <div className="barra-contenido">
-          <div className="marca-brand">
-            <div className="logo-badge">AG</div>
-            <h1 className="marca-titulo">Ayni Go <span>Admin</span></h1>
-          </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      <Header
+        seccion={seccion}
+        email={email}
+        onCambiarSeccion={irASeccion}
+        onCerrarSesion={cerrarSesion}
+      />
 
-          <nav className="menu-navegacion" aria-label="Navegación principal">
-            <button
-              className={`menu-item ${seccion === 'choferes' ? 'activo' : ''}`}
-              onClick={() => { setSeccion('choferes'); setChoferId(null); }}
-            >
-              🚘 Choferes
-            </button>
-            <button
-              className={`menu-item ${seccion === 'historial' ? 'activo' : ''}`}
-              onClick={() => { setSeccion('historial'); setChoferId(null); }}
-            >
-              📋 Historial
-            </button>
-          </nav>
-
-          <div className="barra-usuario">
-            <div className="usuario-info">
-              <span className="usuario-label">Administrador</span>
-              <span className="usuario-email" title={email}>{email}</span>
-            </div>
-            <button className="boton-cerrar-sesion" onClick={cerrarSesion} title="Cerrar sesión">
-              🚪 <span>Salir</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Área de Contenido Principal */}
-      <main className="contenido-principal">
+      <main className="flex-1 w-full">
         {choferId ? (
           <DetalleChofer choferId={choferId} onVolver={() => setChoferId(null)} />
         ) : seccion === 'historial' ? (

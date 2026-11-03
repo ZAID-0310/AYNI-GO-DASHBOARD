@@ -185,23 +185,7 @@ export default function Login({ onEntrar, aviso }) {
             >
               👑 Admin
             </button>
-            <button
-              type="button"
-              onClick={() => setRolSeleccionado('conductor')}
-              style={{
-                background: rolSeleccionado === 'conductor' ? '#ffffff' : 'transparent',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '10px',
-                fontSize: '12px',
-                fontWeight: '700',
-                color: rolSeleccionado === 'conductor' ? '#0f172a' : '#64748b',
-                cursor: 'pointer',
-                boxShadow: rolSeleccionado === 'conductor' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'
-              }}
-            >
-              🚗 Conductor
-            </button>
+           
           </div>
         </div>
 
