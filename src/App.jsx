@@ -4,6 +4,7 @@ import Login from './features/auth/Login';
 import ListaChoferes from './features/choferes/ListaChoferes';
 import DetalleChofer from './features/choferes/DetalleChofer';
 import HistorialGlobal from './features/historial/HistorialGlobal';
+import ObjetosPerdidos from './features/objetos/ObjetosPerdidos';
 import './App.css';
 
 export default function App() {
@@ -74,6 +75,12 @@ export default function App() {
             >
               📋 Historial
             </button>
+            <button
+              className={`menu-item ${seccion === 'objetos' ? 'activo' : ''}`}
+              onClick={() => { setSeccion('objetos'); setChoferId(null); }}
+            >
+              🎒 Objetos perdidos
+            </button>
           </nav>
 
           <div className="barra-usuario">
@@ -92,6 +99,8 @@ export default function App() {
       <main className="contenido-principal">
         {choferId ? (
           <DetalleChofer choferId={choferId} onVolver={() => setChoferId(null)} />
+            ) : seccion === 'objetos' ? (
+          <ObjetosPerdidos />
         ) : seccion === 'historial' ? (
           <HistorialGlobal
             onAbrirChofer={(id) => { setSeccion('choferes'); setChoferId(id); }}
