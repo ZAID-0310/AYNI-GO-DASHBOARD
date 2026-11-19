@@ -68,6 +68,8 @@ export default function App() {
       <main className="flex-1 w-full">
         {choferId ? (
           <DetalleChofer choferId={choferId} onVolver={() => setChoferId(null)} />
+            ) : seccion === 'objetos' ? (
+          <ObjetosPerdidos />
         ) : seccion === 'historial' ? (
           <HistorialGlobal
             onAbrirChofer={(id) => { setSeccion('choferes'); setChoferId(id); }}
